@@ -10,7 +10,7 @@
 typedef char Byte;
 typedef unsigned char UByte;
 
-typedef unsigned char Bool;
+typedef bool Bool;
 
 typedef signed short int Int16;
 typedef unsigned short int UInt16;

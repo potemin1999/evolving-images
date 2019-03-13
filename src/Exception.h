@@ -7,37 +7,25 @@
 
 #include "Types.h"
 
-typedef struct {
-    char *function;
-} StackFrameRecord;
-
-class StackTrace {
-private:
-    Int32 size;
-    StackFrameRecord *data;
-
-public:
-    explicit StackTrace();
-
-    ~ StackTrace();
-
-    inline Int32 getSize() { return size; }
-
-    inline StackFrameRecord *getData() { return data; }
-};
+class StackTrace;
 
 class Exception : private std::exception {
 protected:
 
     StackTrace *stack;
 
+    Exception *cause;
+
     const char *name;
 
     const char *message;
 
+    explicit Exception(const char *exceptionName, const char *msg, Exception *cause);
+
     explicit Exception(const char *exceptionName, const char *msg);
 
 public:
+
     ~Exception() override;
 
     inline const char *getName() { return name; }
@@ -49,16 +37,27 @@ public:
     void printStackTrace();
 };
 
-#define GENERATE_EXCEPTION(name) \
-    class name : public Exception { \
-    public: \
-    explicit name(const char *msg) : Exception(#name,msg) {} \
+#define GENERATE_EXCEPTION(name)                        \
+    class name : public Exception {                     \
+    public:                                             \
+    explicit name(const char *msg, Exception *cause) :  \
+        Exception(#name,msg,cause) {}                   \
+    explicit inline name(const char *msg) :             \
+        Exception(#name,msg) {}                         \
     };
 
-GENERATE_EXCEPTION(NullPointerException)
+GENERATE_EXCEPTION(ArithmeticException)
 
 GENERATE_EXCEPTION(IllegalArgumentException)
 
+GENERATE_EXCEPTION(IllegalInstructionException)
+
 GENERATE_EXCEPTION(IllegalStateException)
+
+GENERATE_EXCEPTION(InterruptedException)
+
+GENERATE_EXCEPTION(NullPointerException)
+
+GENERATE_EXCEPTION(SegfaultException)
 
 #endif //EVOLVING_IMAGES_EXCEPTION_H

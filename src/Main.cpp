@@ -23,8 +23,8 @@ int main(int argc, char **argv) {
         out.close();
         delete bitmap2;
         return 0;
-    } catch (IllegalArgumentException &e) {
+    } catch (Exception &e) {
         e.printStackTrace();
-        //printf("%s",e.getMessage());
+        throw IllegalStateException("Exception in function main()",&e);
     }
 }
