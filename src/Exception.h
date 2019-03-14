@@ -5,12 +5,30 @@
 #ifndef EVOLVING_IMAGES_EXCEPTION_H
 #define EVOLVING_IMAGES_EXCEPTION_H
 
+#include <iostream>
 #include "Types.h"
 
 class StackTrace;
 
+class Exception;
+
+class __ExceptImpl {
+public:
+
+    static void *allocateException(size_t size);
+
+    static void freeException(void *ptr);
+
+    static void popExceptionStack(Exception *exception);
+
+    static void doTerminate();
+
+    static void processSignal(int signalNumber);
+};
+
 class Exception : private std::exception {
 protected:
+    friend class __ExceptImpl;
 
     StackTrace *stack;
 
@@ -34,17 +52,35 @@ public:
 
     inline const char *getMessage() { return message; }
 
-    void printStackTrace();
+    void printStackTrace(std::ostream &out);
+
+    inline void printStackTrace() {
+        printStackTrace(std::cout);
+    }
+
 };
 
 #define GENERATE_EXCEPTION(name)                        \
     class name : public Exception {                     \
     public:                                             \
+    __attribute__((noinline))                           \
     explicit name(const char *msg, Exception *cause) :  \
         Exception(#name,msg,cause) {}                   \
+    __attribute__((noinline))                           \
     explicit inline name(const char *msg) :             \
         Exception(#name,msg) {}                         \
-    };
+    inline static Exception *createNew(const char* msg){\
+        auto newException = new name(msg);              \
+        __ExceptImpl::popExceptionStack(newException);  \
+        return newException;                            \
+    }                                                   \
+    void* operator new(size_t size){                    \
+        return __ExceptImpl::allocateException(size);   \
+    }                                                   \
+    void operator delete(void* ptr){                    \
+        __ExceptImpl::freeException(ptr);               \
+    }                                                   \
+};
 
 GENERATE_EXCEPTION(ArithmeticException)
 

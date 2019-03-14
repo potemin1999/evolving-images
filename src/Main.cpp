@@ -25,6 +25,6 @@ int main(int argc, char **argv) {
         return 0;
     } catch (Exception &e) {
         e.printStackTrace();
-        throw IllegalStateException("Exception in function main()",&e);
+        throw IllegalStateException("Exception in function main()", &e);
     }
 }
