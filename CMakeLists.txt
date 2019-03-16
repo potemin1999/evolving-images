@@ -16,6 +16,8 @@ set(GA_LIBRARY ga-library)
 find_package(PNG REQUIRED)
 
 #building
+add_library(${GA_LIBRARY} STATIC ${GA_SOURCES})
+
 add_library(${JAVALIB_LIBRARY} STATIC ${JAVALIB_SOURCES})
 target_link_libraries(${JAVALIB_LIBRARY} png)
 target_link_libraries(${JAVALIB_LIBRARY} unwind)
@@ -24,4 +26,5 @@ target_link_libraries(${JAVALIB_LIBRARY} stdc++)
 add_executable(${EVOIMG_EXECUTABLE} ${EVOIMG_SOURCES})
 include_directories(${EVOIMG_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/ga)
 include_directories(${EVOIMG_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/support)
+target_link_libraries(${EVOIMG_EXECUTABLE} ${GA_LIBRARY})
 target_link_libraries(${EVOIMG_EXECUTABLE} ${JAVALIB_LIBRARY})

@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         for (int i = 0; i < 40 * 40; i++) {
             blackPixels[i] = Pixel{.r=20, .g=20, .b=20, .a=255};
         }
-        bitmap2->setPixels(blackPixels, 2000, 200, 40, 40);
+        bitmap2->setPixels(blackPixels, 200, 200, 40, 40);
         delete[] blackPixels;
         bitmap2->compress(Bitmap::PNG, 100, out);
         out.close();

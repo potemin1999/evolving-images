@@ -9,4 +9,6 @@
 #include "Exception.h"
 #include "Types.h"
 
+#include "GATypes.h"
+
 #endif //EVOLVING_IMAGES_MAIN_H
