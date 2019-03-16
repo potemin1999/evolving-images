@@ -8,7 +8,7 @@
 #include "Exception.h"
 #include "Types.h"
 
-namespace EvoImg {
+JAVALIB_NAMESPACE_BEGIN
 
 /**
  * 4 byte bitmap pixel representation
@@ -88,6 +88,6 @@ public:
 
 };
 
-} //EvoImg
+JAVALIB_NAMESPACE_END
 
 #endif //EVOLVING_IMAGES_BITMAP_H

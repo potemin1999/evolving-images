@@ -5,8 +5,12 @@
 #ifndef EVOLVING_IMAGES_TYPES_H
 #define EVOLVING_IMAGES_TYPES_H
 
+#define JAVALIB_NAMESPACE_BEGIN namespace jl{
+#define JAVALIB_NAMESPACE_END }
+
 #include <fstream>
 
+JAVALIB_NAMESPACE_BEGIN
 typedef char Byte;
 typedef unsigned char UByte;
 
@@ -21,5 +25,7 @@ typedef std::istream InputStream;
 typedef std::ostream OutputStream;
 typedef std::ifstream FileInputStream;
 typedef std::ofstream FileOutputStream;
+
+JAVALIB_NAMESPACE_END
 
 #endif //EVOLVING_IMAGES_TYPES_H

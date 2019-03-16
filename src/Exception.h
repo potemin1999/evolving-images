@@ -8,6 +8,8 @@
 #include <iostream>
 #include "Types.h"
 
+JAVALIB_NAMESPACE_BEGIN
+
 class StackTrace;
 
 class Exception;
@@ -95,5 +97,7 @@ GENERATE_EXCEPTION(InterruptedException)
 GENERATE_EXCEPTION(NullPointerException)
 
 GENERATE_EXCEPTION(SegfaultException)
+
+JAVALIB_NAMESPACE_END
 
 #endif //EVOLVING_IMAGES_EXCEPTION_H

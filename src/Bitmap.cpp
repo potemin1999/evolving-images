@@ -6,7 +6,7 @@
 #include <png.h>
 #include <cstring>
 
-namespace EvoImg {
+JAVALIB_NAMESPACE_BEGIN
 
 Bitmap::Bitmap(UInt32 width, UInt32 height, Config config) {
     this->width = width;
@@ -211,4 +211,4 @@ Bitmap *BitmapFactory::decodeFile(const char *filename) {
     return bitmap;
 }
 
-} //EvoImg
+JAVALIB_NAMESPACE_END

@@ -17,6 +17,8 @@
 #include <vector>
 #include "Exception.h"
 
+JAVALIB_NAMESPACE_BEGIN
+
 class StackFrameRecord {
 public:
 
@@ -233,3 +235,5 @@ void init() {
     }
     std::set_terminate(__ExceptImpl::doTerminate);
 }
+
+JAVALIB_NAMESPACE_END
