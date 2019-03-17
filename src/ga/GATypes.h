@@ -12,13 +12,14 @@ GA_NAMESPACE_BEGIN
 
 typedef double Fitness;
 
-
+template<typename Gene>
 class Engine;
 
 template<typename Gene>
 class BreedSelector;
 
-class Crossover;
+template<typename Gene>
+class CrossoverExecutor;
 
 template<typename Gene>
 class Chromosome {
