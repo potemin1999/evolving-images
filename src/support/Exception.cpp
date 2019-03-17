@@ -29,7 +29,7 @@ public:
     char *source;
     char *function;
 
-    ~StackFrameRecord(){
+    ~StackFrameRecord() {
         delete[] file;
         delete[] source;
         delete[] function;

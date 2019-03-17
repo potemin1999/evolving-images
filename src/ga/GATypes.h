@@ -10,18 +10,56 @@
 
 GA_NAMESPACE_BEGIN
 
+typedef double Fitness;
+
+
+class Engine;
+
 template<typename Gene>
-class Chromosome{
+class BreedSelector;
+
+class Crossover;
+
+template<typename Gene>
+class Chromosome {
 private:
-    Gene* genes;
-    int genCount;
+    Gene *genes;
+    int genesCount;
+    Fitness fitness;
+
 public:
-    Chromosome(Gene* genes,int genesCount);
-    virtual ~Chromosome();
-    virtual void setGenes(Gene* gens,int genesCount);
-    virtual const Gene* getGenes();
-    virtual int getGenesCount();
-    virtual int getBitCount();
+    Chromosome(Gene *genes, int genesCount) {
+        this->setGenes(genes, genesCount);
+    }
+
+    virtual ~Chromosome() {
+        delete[] genes;
+    }
+
+    void setFitness(Fitness fitness) {
+        this->fitness = fitness;
+    }
+
+    void setGenes(Gene *gens, int genesCount) {
+        this->genes = genes;
+        this->genesCount = genesCount;
+    }
+
+    const Fitness getFitness() {
+        return this->fitness;
+    }
+
+    const Gene *getGenes() {
+        return this->genes;
+    }
+
+    const int getGenesCount() {
+        return this->genesCount;
+    }
+
+    const int getBitCount() {
+        return getGenesCount() * sizeof(Gene);
+    }
 };
 
 GA_NAMESPACE_END
