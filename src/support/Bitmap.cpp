@@ -117,9 +117,17 @@ void CompressPng(Bitmap *bitmap, OutputStream &out) {
     if (!info) abort();
     if (setjmp(png_jmpbuf(png))) abort();
 
+    int colorType = 0;
+    if (config==Bitmap::Config::RGB_888){
+        colorType = PNG_COLOR_TYPE_RGB;
+    }else if(config == Bitmap::Config::RGBA_8888){
+        colorType = PNG_COLOR_TYPE_RGBA;
+    }else{
+        colorType = PNG_COLOR_TYPE_RGB;
+    }
     //write
     png_set_IHDR(png, info, width, height, 8,
-                 PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+                 colorType, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT
     );
     png_set_write_fn(png, &out, DoWriteToStream, nullptr);
