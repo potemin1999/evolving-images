@@ -40,17 +40,18 @@ Chromosome<Gene> BitFlipMutator<Gene>::execute(const Chromosome<Gene> &chromosom
     int bitIndex = static_cast<int>(bitDistribution(randomEngine));
     int bytesOffset = bitIndex / 8;
     int bitOffset = bitIndex % 8;
-    Gene* genes = chromosome.getGenes();
-    Gene* genesCopy = new Gene[chromosome.getGenesCount()];
-    memcpy(genesCopy,genes, static_cast<size_t>(genesCount*sizeof(Gene)));
-    char* castedGenes = (char*) genesCopy;
+    Gene *genes = chromosome.getGenes();
+    Gene *genesCopy = new Gene[chromosome.getGenesCount()];
+    memcpy(genesCopy, genes, static_cast<size_t>(genesCount * sizeof(Gene)));
+    char *castedGenes = reinterpret_cast<char *>(genesCopy);
     castedGenes[bytesOffset] ^= static_cast<UByte>(1 << bitOffset);
-    return Chromosome<Gene>(genesCopy,chromosome.getGenesCount());
+    return Chromosome<Gene>(genesCopy, chromosome.getGenesCount());
 }
 
 template<typename Gene>
 Mutator<Gene> *Mutator<Gene>::getBitFlipMutator() {
-    return new BitFlipMutator<Gene>();
+    static BitFlipMutator<Gene> bitFlipMutator;
+    return bitFlipMutator;
 }
 
 template<typename Gene>

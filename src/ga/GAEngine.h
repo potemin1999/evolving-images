@@ -26,20 +26,27 @@ public:
 };
 
 template<typename Gene>
-class Initializer : protected EngineComponent{
+class Initializer : protected EngineComponent {
 public:
 
-    virtual void init();
+    virtual void init(Chromosome<Gene> *chromosomes, int required);
 };
 
 template<typename Gene>
-class Selector : protected EngineComponent{
+class Selector : protected EngineComponent {
 public:
     static Selector<Gene> *getAverageBoundSelector();
 
 public:
 
-    virtual bool survive(const Chromosome<Gene>& chromosome);
+    virtual bool survive(const Chromosome<Gene> &chromosome);
+};
+
+template<typename Gene>
+class ChromosomeGenerator : protected EngineComponent {
+public:
+
+    virtual Chromosome<Gene> generate();
 };
 
 template<typename Gene>
@@ -65,7 +72,8 @@ public:
 
 public:
 
-    virtual Chromosome<Gene> execute(Chromosome<Gene> &chromosome1, Chromosome<Gene> &chromosome2);
+    virtual void execute(const Chromosome<Gene> &inChromosome1, const Chromosome<Gene> &inChromosome2,
+                         Chromosome<Gene> &outChromosome1, Chromosome<Gene> &outChromosome2);
 };
 
 template<typename Gene>
@@ -86,6 +94,7 @@ public:
 class Stage {
 public:
     static const int INITIALIZATION = 0;
+    static const int GENERATION = 1;
     static const int SELECTION = 2;
     static const int BREEDING = 3;
     static const int CROSSOVER = 4;
