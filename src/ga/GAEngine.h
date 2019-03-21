@@ -26,6 +26,23 @@ public:
 };
 
 template<typename Gene>
+class Initializer : protected EngineComponent{
+public:
+
+    virtual void init();
+};
+
+template<typename Gene>
+class Selector : protected EngineComponent{
+public:
+    static Selector<Gene> *getAverageBoundSelector();
+
+public:
+
+    virtual bool survive(const Chromosome<Gene>& chromosome);
+};
+
+template<typename Gene>
 class BreedSelector : protected EngineComponent {
 public:
     static BreedSelector<Gene> *getInbreedingSelector();
@@ -35,9 +52,6 @@ public:
     static BreedSelector<Gene> *getPanmixingSelector();
 
 public:
-    BreedSelector() = default;
-
-    ~BreedSelector() = default;
 
     virtual void sort(Chromosome<Gene> *chromosomes, int count);
 };
@@ -51,18 +65,71 @@ public:
 
 public:
 
-    CrossoverExecutor() = default;
-
-    ~CrossoverExecutor() = default;
-
     virtual Chromosome<Gene> execute(Chromosome<Gene> &chromosome1, Chromosome<Gene> &chromosome2);
 };
 
 template<typename Gene>
+class Mutator : protected EngineComponent {
+public:
+    static Mutator<Gene> *getBitFlipMutator();
+
+public:
+
+    /**
+     * Default behaviour - no mutation
+     * @param chromosome Source genes
+     * @return new chromosome with mutation
+     */
+    virtual Chromosome<Gene> execute(const Chromosome<Gene> &chromosome);
+};
+
+class Stage {
+public:
+    static const int INITIALIZATION = 0;
+    static const int SELECTION = 2;
+    static const int BREEDING = 3;
+    static const int CROSSOVER = 4;
+    static const int MUTATION = 6;
+    static const int TERMINATION = 8;
+
+    int operator()(const int &key) const {
+        return key;
+    }
+};
+
+
+template<typename Gene>
+class EngineState;
+
+template<typename Gene>
 class Engine {
 private:
-    BreedSelector<Gene> *breedSelector;
-    CrossoverExecutor<Gene> *crossoverExecutor;
+    EngineState<Gene> *state;
+
+public:
+    Engine();
+
+    ~Engine();
+
+    Fitness getCurrentAverageFitness();
+
+    int getPopulationSize();
+
+    void setFitnessFunction(FitnessFunction<Gene> function);
+
+    /**
+     *
+     * @tparam E Engine component for stage executing
+     * @param stage Stage to set
+     * @param component Pointer to component
+     */
+    template<typename E>
+    void setStage(int stage, E &component);
+
+    void setPopulationSize(int size);
+
+    Chromosome<Gene> run();
+
 };
 
 GA_NAMESPACE_END
