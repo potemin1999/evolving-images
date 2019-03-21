@@ -9,6 +9,18 @@ using namespace ga;
 GA_NAMESPACE_BEGIN
 
 template<typename Gene>
+class CrossoverExecutorLambda : public CrossoverExecutor {
+public:
+    void (*executeFunc)(const Chromosome<Gene> &, const Chromosome<Gene> &,
+                        Chromosome<Gene> &, Chromosome<Gene> &);
+
+    void execute(const Chromosome<Gene> &inChromosome1, const Chromosome<Gene> &inChromosome2,
+                 Chromosome<Gene> &outChromosome1, Chromosome<Gene> &outChromosome2) override {
+        (*executeFunc)(inChromosome1, inChromosome2, outChromosome1, outChromosome2);
+    }
+};
+
+template<typename Gene>
 class SinglePointCrossoverExecutor : public CrossoverExecutor<Gene> {
 public:
     void execute(const Chromosome<Gene> &inChromosome1, const Chromosome<Gene> &inChromosome2,
@@ -81,6 +93,15 @@ void TwoPointCrossoverExecutor<Gene>::execute(const Chromosome<Gene> &inChromoso
     }
     outChromosome1.setGenes(newGenes1, inChromosome1.getGenesCount());
     outChromosome2.setGenes(newGenes2, inChromosome2.getGenesCount());
+}
+
+template<typename Gene>
+CrossoverExecutor<Gene> CrossoverExecutor<Gene>::of(
+        void (*executeFunc)(const Chromosome<Gene> &, const Chromosome<Gene> &, Chromosome<Gene> &,
+                            Chromosome<Gene> &)) {
+    CrossoverExecutorLambda<Gene> crossoverExecutor;
+    crossoverExecutor.executeFunc = executeFunc;
+    return crossoverExecutor;
 }
 
 template<typename Gene>

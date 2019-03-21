@@ -18,6 +18,16 @@ void BreedSelector<Gene>::sort(Chromosome<Gene> *chromosomes, int count) {
 }
 
 
+template<typename Gene>
+class BreedSelectorLambda : public BreedSelector<Gene> {
+public:
+    void (*sortFunc)(Chromosome<Gene> *, int);
+
+    void sort(Chromosome<Gene> *chromosomes, int count) override {
+        (*sortFunc)(chromosomes, count);
+    }
+};
+
 /**
  * Fitness <50,49>, <48,47>, <46,45>, ... , <2,1>
  * @tparam Gene
@@ -105,6 +115,13 @@ void RandomBreedSelector<Gene>::sort(Chromosome<Gene> *chromosomes, int count) {
     }
 }
 
+
+template<typename Gene>
+BreedSelector<Gene> BreedSelector<Gene>::of(void (*sortFunc)(Chromosome<Gene> *, int)) {
+    BreedSelectorLambda<Gene> breedSelector;
+    breedSelector.sortFunc = sortFunc;
+    return breedSelector;
+}
 
 template<typename Gene>
 BreedSelector<Gene> *BreedSelector<Gene>::getInbreedingSelector() {

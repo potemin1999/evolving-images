@@ -13,13 +13,46 @@ using namespace ga;
 using namespace std;
 
 template<typename Gene>
-void Initializer<Gene>::init(Chromosome<Gene> *chromosomes, int required) {
+class InitializerLambda : public Initializer<Gene> {
+public:
+    void (*initFunc)(Chromosome<Gene> *, int);
 
+    void init(Chromosome<Gene> *chromosomes, int required) override {
+        (*initFunc)(chromosomes, required);
+    }
+};
+
+template<typename Gene>
+class SelectorLambda : public Selector<Gene> {
+public:
+    bool (*surviveFunc)(const Chromosome<Gene> &);
+
+    bool survive(const Chromosome<Gene> &chromosome) override {
+        return (*surviveFunc)(chromosome);
+    }
+};
+
+template<typename Gene>
+void Initializer<Gene>::init(Chromosome<Gene> *chromosomes, int required) {}
+
+template<typename Gene>
+Initializer<Gene> Initializer<Gene>::of(void (*initFunc)(Chromosome<Gene> *, int)) {
+    InitializerLambda<Gene> initializer;
+    initializer.initFunc = initFunc;
+    return initializer;
 }
 
 template<typename Gene>
 bool Selector<Gene>::survive(const Chromosome<Gene> &chromosome) {
     return chromosome.getFitness() > getAttachedTo<Gene>()->getCurrentAverageFitness();
+}
+
+
+template<typename Gene>
+Selector<Gene> Selector<Gene>::of(bool (*surviveFunc)(const Chromosome<Gene> &)) {
+    SelectorLambda<Gene> selector;
+    selector.surviveFunc = surviveFunc;
+    return selector;
 }
 
 template<typename Gene>

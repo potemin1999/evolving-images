@@ -11,6 +11,18 @@ using namespace jl;
 using namespace ga;
 using namespace std;
 
+GA_NAMESPACE_BEGIN
+
+template<typename Gene>
+class MutatorLambda : public Mutator<Gene> {
+public:
+    Chromosome<Gene> (*executeFunc)(const Chromosome<Gene> &);
+
+    Chromosome<Gene> execute(const Chromosome<Gene> &chromosome) override {
+        return (*executeFunc)(chromosome);
+    }
+};
+
 template<typename Gene>
 class BitFlipMutator : public Mutator<Gene> {
 private:
@@ -21,6 +33,8 @@ public:
 
     Chromosome<Gene> execute(const Chromosome<Gene> &chromosome) override;
 };
+
+GA_NAMESPACE_END
 
 template<typename Gene>
 BitFlipMutator<Gene>::BitFlipMutator() : Mutator<Gene>::Mutator() {
@@ -46,6 +60,13 @@ Chromosome<Gene> BitFlipMutator<Gene>::execute(const Chromosome<Gene> &chromosom
     char *castedGenes = reinterpret_cast<char *>(genesCopy);
     castedGenes[bytesOffset] ^= static_cast<UByte>(1 << bitOffset);
     return Chromosome<Gene>(genesCopy, chromosome.getGenesCount());
+}
+
+template<typename Gene>
+Mutator<Gene> Mutator<Gene>::of(Chromosome<Gene> (*executeFunc)(const Chromosome<Gene> &)) {
+    MutatorLambda<Gene> mutator;
+    mutator.executeFunc = executeFunc;
+    return mutator;
 }
 
 template<typename Gene>

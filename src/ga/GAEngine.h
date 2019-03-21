@@ -28,6 +28,9 @@ public:
 template<typename Gene>
 class Initializer : protected EngineComponent {
 public:
+    static Initializer<Gene> of(void (*initFunc)(Chromosome<Gene> *, int));
+
+public:
 
     virtual void init(Chromosome<Gene> *chromosomes, int required);
 };
@@ -35,6 +38,8 @@ public:
 template<typename Gene>
 class Selector : protected EngineComponent {
 public:
+    static Selector<Gene> of(bool (*surviveFunc)(const Chromosome<Gene> &));
+
     static Selector<Gene> *getAverageBoundSelector();
 
 public:
@@ -52,6 +57,8 @@ public:
 template<typename Gene>
 class BreedSelector : protected EngineComponent {
 public:
+    static BreedSelector<Gene> of(void (*sortFunc)(Chromosome<Gene> *, int));
+
     static BreedSelector<Gene> *getInbreedingSelector();
 
     static BreedSelector<Gene> *getOutbreedingSelector();
@@ -66,6 +73,9 @@ public:
 template<typename Gene>
 class CrossoverExecutor : protected EngineComponent {
 public:
+    static CrossoverExecutor<Gene> of(void (*executeFunc)(const Chromosome<Gene> &, const Chromosome<Gene> &,
+                                                          Chromosome<Gene> &, Chromosome<Gene> &))
+
     static CrossoverExecutor<Gene> *getSinglePointCrossoverExecutor();
 
     static CrossoverExecutor<Gene> *getTwoPointCrossoverExecutor();
@@ -79,6 +89,8 @@ public:
 template<typename Gene>
 class Mutator : protected EngineComponent {
 public:
+    static Mutator<Gene> of(Chromosome<Gene> (*executeFunc)(const Chromosome<Gene> &));
+
     static Mutator<Gene> *getBitFlipMutator();
 
 public:
