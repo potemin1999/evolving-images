@@ -59,6 +59,25 @@ public:
 };
 
 template<typename Gene>
+class Mutator : protected EngineComponent {
+public:
+    static Mutator<Gene> *getBitFlipMutator();
+
+public:
+
+    Mutator() = default;
+
+    ~Mutator() = default;
+
+    /**
+     * Default behaviour - no mutation
+     * @param chromosome Source genes
+     * @return new chromosome with mutation
+     */
+    virtual Chromosome<Gene> execute(const Chromosome<Gene> &chromosome);
+};
+
+template<typename Gene>
 class Engine {
 private:
     BreedSelector<Gene> *breedSelector;
