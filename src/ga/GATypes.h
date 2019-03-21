@@ -63,6 +63,18 @@ public:
     }
 };
 
+template<typename Gene>
+class FitnessFunction{
+public:
+    virtual Fitness apply(Chromosome<Gene> &chromosome) = 0;
+};
+
+template<typename Gene>
+class TerminationCondition{
+public:
+    virtual bool terminate();
+};
+
 GA_NAMESPACE_END
 
 #endif //EVOLVING_IMAGES_GATYPES_H
