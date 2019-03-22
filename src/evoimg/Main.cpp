@@ -31,15 +31,9 @@ int main(int argc, char **argv) {
     }
 }
  */
-typedef UInt32 Gene;
-template class ga::Engine<Gene>;
-/*
-template class ga::Chromosome<Gene>;
-template class ga::Initializer<Gene>;
-template class ga::TerminationCondition<Gene>;
-*/
+
 int main(int argc, char **argv) {
-    Engine<UInt32>* engine = new Engine<UInt32>();
+    auto engine = new Engine<UInt32>();
     auto initializer = Initializer<UInt32>::of([](auto chromosomes,auto required){});
     engine->setStage(Stage::INITIALIZATION,&initializer);
     engine->run();
