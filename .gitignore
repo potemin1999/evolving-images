@@ -33,6 +33,7 @@
 
 #Idea
 .idea/
+**/.fuse_hidden*
 
 #CMake
 cmake-build-debug/

@@ -12,6 +12,8 @@ using namespace jl;
 using namespace ga;
 using namespace std;
 
+GA_NAMESPACE_BEGIN
+
 template<typename Gene>
 class InitializerLambda : public Initializer<Gene> {
 public:
@@ -32,12 +34,14 @@ public:
     }
 };
 
+GA_NAMESPACE_END
+
 template<typename Gene>
 void Initializer<Gene>::init(Chromosome<Gene> *chromosomes, int required) {}
 
 template<typename Gene>
 Initializer<Gene> Initializer<Gene>::of(void (*initFunc)(Chromosome<Gene> *, int)) {
-    InitializerLambda<Gene> initializer;
+    InitializerLambda <Gene> initializer;
     initializer.initFunc = initFunc;
     return initializer;
 }
@@ -50,7 +54,7 @@ bool Selector<Gene>::survive(const Chromosome<Gene> &chromosome) {
 
 template<typename Gene>
 Selector<Gene> Selector<Gene>::of(bool (*surviveFunc)(const Chromosome<Gene> &)) {
-    SelectorLambda<Gene> selector;
+    SelectorLambda <Gene> selector;
     selector.surviveFunc = surviveFunc;
     return selector;
 }
@@ -70,7 +74,7 @@ public:
     int populationSize = 0;
     Fitness currentFitness = 0;
     FitnessFunction<Gene> fitnessFunction;
-    unordered_map<int, EngineComponent *> stagesMap;
+    unordered_map<int, EngineComponent &> stagesMap;
     TerminationCondition<Gene> terminationCondition;
     int currentGenerationSize = 0;
     Chromosome<Gene> *currentGeneration;
@@ -85,7 +89,7 @@ Chromosome<Gene> ChromosomeGenerator<Gene>::generate() {
     static random_device randomDevice;
     static mt19937 randomEngine(randomDevice);
     auto engineState = getAttachedTo<Gene>()->state;
-    auto hasPreviousGen = (engineState->previousGenerationSize == nullptr);
+    auto hasPreviousGen = (engineState->previousGeneration == nullptr);
     auto selectionSet = hasPreviousGen ? engineState->previousGeneration : engineState->currentGeneration;
     auto upperBound = hasPreviousGen ? engineState->previousGenerationSize : engineState->currentGenerationSize;
     uniform_int_distribution<mt19937::result_type> geneDistribution(0, static_cast<unsigned long>(upperBound));
@@ -121,15 +125,15 @@ void Engine<Gene>::setFitnessFunction(FitnessFunction<Gene> function) {
 template<typename Gene>
 template<typename E>
 void Engine<Gene>::setStage(int stage, E &component) {
-    static_assert(component != nullptr);
     auto engineComponent = static_cast<EngineComponent>(component);
     engineComponent.attachTo(this);
     if (stage == Stage::INITIALIZATION) {
-        state->initializer = static_cast<Initializer<Gene>>(component);
+        state->stagesMap[Stage::INITIALIZATION] = component;
     } else if (stage == Stage::TERMINATION) {
-        state->terminationCondition = static_cast<TerminationCondition<Gene>>(component);
+        state->stagesMap[Stage::TERMINATION] = component;
+    } else {
+        state->stagesMap[stage] = component;
     }
-    state->stagesMap.insert(stage, &component);
 }
 
 template<typename Gene>

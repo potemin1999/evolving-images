@@ -9,7 +9,7 @@ using namespace ga;
 GA_NAMESPACE_BEGIN
 
 template<typename Gene>
-class CrossoverExecutorLambda : public CrossoverExecutor {
+class CrossoverExecutorLambda : public CrossoverExecutor<Gene> {
 public:
     void (*executeFunc)(const Chromosome<Gene> &, const Chromosome<Gene> &,
                         Chromosome<Gene> &, Chromosome<Gene> &);

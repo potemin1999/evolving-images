@@ -16,10 +16,19 @@ template<typename Gene>
 class Engine;
 
 template<typename Gene>
+class Initializer;
+
+template<typename Gene>
+class Selector;
+
+template<typename Gene>
 class BreedSelector;
 
 template<typename Gene>
 class CrossoverExecutor;
+
+template<typename Gene>
+class Mutator;
 
 template<typename Gene>
 class Chromosome {
@@ -29,6 +38,8 @@ private:
     Fitness fitness;
 
 public:
+    Chromosome() = default;
+
     Chromosome(Gene *genes, int genesCount) {
         this->setGenes(genes, genesCount);
     }
@@ -46,19 +57,19 @@ public:
         this->genesCount = genesCount;
     }
 
-    const Fitness getFitness() {
+    Fitness getFitness() const{
         return this->fitness;
     }
 
-    const Gene *getGenes() {
+    Gene *getGenes() const {
         return this->genes;
     }
 
-    const int getGenesCount() {
+    int getGenesCount() const {
         return this->genesCount;
     }
 
-    const int getBitCount() {
+    int getBitCount() const{
         return getGenesCount() * sizeof(Gene);
     }
 };
@@ -66,13 +77,7 @@ public:
 template<typename Gene>
 class FitnessFunction{
 public:
-    virtual Fitness apply(Chromosome<Gene> &chromosome) = 0;
-};
-
-template<typename Gene>
-class TerminationCondition{
-public:
-    virtual bool terminate();
+    virtual Fitness apply(Chromosome<Gene> &chromosome) { return 0; };
 };
 
 GA_NAMESPACE_END
