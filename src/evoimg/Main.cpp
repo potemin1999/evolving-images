@@ -4,8 +4,10 @@
 
 #include "Main.h"
 
+using namespace ga;
 using namespace jl;
 
+/*
 int main(int argc, char **argv) {
     try {
         auto bitmap = BitmapFactory::decodeFile("./img.png");
@@ -27,4 +29,12 @@ int main(int argc, char **argv) {
         e.printStackTrace();
         throw IllegalStateException("Exception in function main()", &e);
     }
+}
+ */
+
+int main(int argc, char **argv) {
+    auto engine = new Engine<UInt32>();
+    auto initializer = Initializer<UInt32>::of([](auto chromosomes,auto required){});
+    engine->setStage(Stage::INITIALIZATION,&initializer);
+    engine->run();
 }
