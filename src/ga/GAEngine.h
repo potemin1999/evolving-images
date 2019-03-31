@@ -45,10 +45,16 @@ private:
     Fitness fitness;
 
 public:
-    Chromosome() = default;
+    Chromosome(){
+        genes = nullptr;
+        genesCount = 0;
+        fitness = 0.0;
+    }
 
     Chromosome(Gene *genes, int genesCount) {
-        this->setGenes(genes, genesCount);
+        this->genes = genes;
+        this->genesCount = genesCount;
+        fitness = 0.0;
     }
 
     virtual ~Chromosome() {
@@ -59,7 +65,7 @@ public:
         this->fitness = fitness;
     }
 
-    void setGenes(Gene *gens, int genesCount) {
+    void setGenes(Gene *genes, int genesCount) {
         this->genes = genes;
         this->genesCount = genesCount;
     }
@@ -109,7 +115,7 @@ public:
     int generation = 0;
     int populationSize = 0;
     Fitness currentFitness = 0;
-    FitnessFunction<Gene> fitnessFunction;
+    FitnessFunction<Gene> *fitnessFunction;
     std::unordered_map<int, EngineComponent *> stagesMap;
     int currentGenerationSize = 0;
     Chromosome<Gene> *currentGeneration;
@@ -121,17 +127,17 @@ public:
 template<typename Gene>
 class InitializerLambda : public Initializer<Gene> {
 public:
-    void (*initFunc)(Chromosome<Gene> *, int);
+    Chromosome<Gene> * (*initFunc)(int);
 
-    void init(Chromosome<Gene> *chromosomes, int required) override {
-        (*initFunc)(chromosomes, required);
+    Chromosome<Gene> * init(int required) override {
+        return (*initFunc)(required);
     }
 };
 
 template<typename Gene>
 class Initializer : public EngineComponent {
 public:
-    static Initializer<Gene> of(void (*initFunc)(Chromosome<Gene> *, int)) {
+    static Initializer<Gene> of(Chromosome<Gene> * (*initFunc)( int)) {
         InitializerLambda<Gene> initializer;
         initializer.initFunc = initFunc;
         return initializer;
@@ -139,7 +145,7 @@ public:
 
 public:
 
-    virtual void init(Chromosome<Gene> *chromosomes, int required) {}
+    virtual Chromosome<Gene> * init(int required) { return nullptr; }
 };
 
 
@@ -170,7 +176,7 @@ public:
 public:
 
     virtual bool survive(const Chromosome<Gene> &chromosome) {
-        return chromosome.getFitness() > getAttachedTo<Gene>()->getCurrentAverageFitness();
+        return true;
     }
 };
 
@@ -183,7 +189,7 @@ public:
         static std::random_device randomDevice;
         static std::mt19937 randomEngine(randomDevice());
         auto engineState = getAttachedTo<Gene>()->state;
-        auto hasPreviousGen = (engineState->previousGeneration == nullptr);
+        auto hasPreviousGen = (engineState->previousGeneration != nullptr);
         auto selectionSet = hasPreviousGen ? engineState->previousGeneration : engineState->currentGeneration;
         auto upperBound = hasPreviousGen ? engineState->previousGenerationSize : engineState->currentGenerationSize;
         std::uniform_int_distribution<std::mt19937::result_type>
@@ -272,9 +278,11 @@ class RandomBreedSelector : public BreedSelector<Gene> {
  * @tparam Gene
  */
 public:
-    RandomBreedSelector() : BreedSelector<Gene>::BreedSelector() {}
+
 
     ~RandomBreedSelector() = default;
+
+    RandomBreedSelector() : BreedSelector<Gene>::BreedSelector() {}
 
     void sort(Chromosome<Gene> *chromosomes, int count) override {
         BreedSelector<Gene>::sort(chromosomes, count);
@@ -446,12 +454,12 @@ public:
         static std::mt19937 randomEngine(device());
         int genesCount = chromosome.getGenesCount();
         std::uniform_int_distribution<std::mt19937::result_type> geneDistribution(
-                0, static_cast<unsigned long>(genesCount - 1));
-        int mutationIndex = static_cast<int>(geneDistribution(randomEngine));
+                0, static_cast<unsigned int>(genesCount - 1));
+        auto mutationIndex = static_cast<unsigned int>(geneDistribution(randomEngine));
         int geneBitSize = chromosome.getBitCount();
         std::uniform_int_distribution<std::mt19937::result_type> bitDistribution(
-                0, static_cast<unsigned long>(geneBitSize - 1));
-        int bitIndex = static_cast<int>(bitDistribution(randomEngine));
+                0, static_cast<unsigned int>(geneBitSize - 1));
+        auto bitIndex = static_cast<unsigned int>(bitDistribution(randomEngine));
         int bytesOffset = bitIndex / 8;
         int bitOffset = bitIndex % 8;
         Gene *genes = chromosome.getGenes();
@@ -528,7 +536,7 @@ public:
         return state->populationSize;
     }
 
-    void setFitnessFunction(FitnessFunction<Gene> function) {
+    void setFitnessFunction(FitnessFunction<Gene> *function) {
         this->state->fitnessFunction = function;
     }
 
@@ -558,6 +566,7 @@ public:
         state->populationSize = size;
     }
 
+    __attribute_noinline__
     Chromosome<Gene> run() {
         finalizeEngineSetup(this);
         if (state->populationSize < 0) {
@@ -568,8 +577,8 @@ public:
         auto stageMap = state->stagesMap;
         auto initializer = static_cast<Initializer<Gene> *>(stageMap[Stage::INITIALIZATION]);
         auto terminator = static_cast<TerminationCondition<Gene> *>(stageMap[Stage::TERMINATION]);
-        initializer->init(state->currentGeneration, state->populationSize);
-        while (terminator->terminate()) {
+        state->currentGeneration = initializer->init(state->populationSize);
+        while (!terminator->terminate()) {
             computeFitness(this->state, state->fitnessFunction);
             auto selector = static_cast<Selector<Gene> *>(stageMap[Stage::SELECTION]);
             applySelector(this->state, selector);
@@ -580,9 +589,17 @@ public:
             auto crossover = static_cast<CrossoverExecutor<Gene> *>(stageMap[Stage::CROSSOVER]);
             applyCrossoverExecutor(this->state, crossover);
             auto mutator = static_cast<Mutator<Gene> *>(stageMap[Stage::MUTATION]);
-            applyMutator(this->state, mutator);
+            //applyMutator(this->state, mutator);
         }
-        return Chromosome<Gene>(nullptr, 0);
+        auto bestFitIndex = static_cast<int>(0);
+        auto bestFitness = 0;
+        for (int i = 0; i < state->currentGenerationSize ; i++){
+            if (state->currentGeneration[i].getFitness() > bestFitness){
+                bestFitness = state->currentGeneration[i].getFitness();
+                bestFitIndex = i;
+            }
+        }
+        return state->currentGeneration[bestFitIndex];
     }
 
 private:
@@ -597,25 +614,31 @@ private:
         }
         if (stageMap[Stage::GENERATION] == nullptr) {
             stageMap[Stage::GENERATION] = new ChromosomeGenerator<Gene>();
+            stageMap[Stage::GENERATION]->attachTo(this);
         }
         if (stageMap[Stage::SELECTION] == nullptr) {
             stageMap[Stage::SELECTION] = Selector<Gene>::getAverageBoundSelector();
+            stageMap[Stage::SELECTION]->attachTo(this);
         }
         if (stageMap[Stage::BREEDING] == nullptr) {
             stageMap[Stage::BREEDING] = BreedSelector<Gene>::getPanmixingSelector();
+            stageMap[Stage::BREEDING]->attachTo(this);
         }
         if (stageMap[Stage::CROSSOVER] == nullptr) {
             stageMap[Stage::CROSSOVER] = CrossoverExecutor<Gene>::getSinglePointCrossoverExecutor();
+            stageMap[Stage::CROSSOVER]->attachTo(this);
         }
         if (stageMap[Stage::MUTATION] == nullptr) {
             stageMap[Stage::MUTATION] = Mutator<Gene>::getBitFlipMutator();
+            stageMap[Stage::MUTATION]->attachTo(this);
         }
+        engine->state->stagesMap = stageMap;
     }
 
-    void computeFitness(EngineState<Gene> *state, FitnessFunction<Gene> &fitnessFunction) {
+    void computeFitness(EngineState<Gene> *state, FitnessFunction<Gene> *fitnessFunction) {
         Fitness fitnessSum = 0;
         for (int i = 0; i < state->currentGenerationSize; i++) {
-            Fitness fit = fitnessFunction.apply(state->currentGeneration[i]);
+            Fitness fit = fitnessFunction->apply(state->currentGeneration[i]);
             state->currentGeneration[i].setFitness(fit);
             fitnessSum += fit;
         }
@@ -630,7 +653,7 @@ private:
             if (selector->survive(currentGeneration[i]))
                 survivors[lastIndex++] = currentGeneration[i];
         }
-        delete state->currentGeneration;
+        delete[] state->currentGeneration;
         state->currentGeneration = survivors;
         state->currentGenerationSize = lastIndex;
         return lastIndex;

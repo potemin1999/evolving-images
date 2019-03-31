@@ -11,4 +11,6 @@
 
 #include "GAEngine.h"
 
+const int PALETTE_SIZE = 8;
+
 #endif //EVOLVING_IMAGES_MAIN_H
