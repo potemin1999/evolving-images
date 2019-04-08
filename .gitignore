@@ -4,5 +4,5 @@ build/
 cmake-build-debug/
 cmake-build-release/
 src/
-out/
+out/*
 !out/.stub
